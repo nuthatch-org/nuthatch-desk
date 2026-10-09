@@ -6,7 +6,7 @@ members = ["crates/mock-nest", "crates/nest-client", "crates/desk-core", "crates
 version = "0.1.0"
 edition = "2024"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/nightswatchhq/nuthatch-desk"
+repository = "https://github.com/nuthatch-org/nuthatch-desk"
 
 [workspace.dependencies]
 cxx = "1.0.176"

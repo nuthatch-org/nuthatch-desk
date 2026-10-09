@@ -1,10 +1,10 @@
 # nuthatch-desk
 
-A read-only desktop client for a running [Nuthatch](https://github.com/nightswatchhq/nuthatch)
+A read-only desktop client for a running [Nuthatch](https://github.com/nuthatch-org/nuthatch)
 nest. Rust underneath, Qt 6 and QML on top, joined by [cxx-qt](https://github.com/KDAB/cxx-qt).
 
 It is the workstation counterpart to
-[nuthatch-tui-client](https://github.com/nightswatchhq/nuthatch-tui-client), and keeps that
+[nuthatch-tui-client](https://github.com/nuthatch-org/nuthatch-tui-client), and keeps that
 client's contract: it speaks to the nest's HTTP API and nothing else. No store access, no RPC key,
 no writes. It adds the three things a terminal cannot hold: a SQL workbench with a real grid,
 charts with history, and several nests open at once.
