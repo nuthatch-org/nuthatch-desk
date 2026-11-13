@@ -16,6 +16,8 @@ concurrency:
 
 env:
   CARGO_TERM_COLOR: always
+  # The commands CI runs live in yatr.toml, so `yatr ci` locally is the same gate.
+  YATR_VERSION: "1.2.0"
 
 jobs:
   # The crates that do not link Qt, on a runner that has none. This is the RFC's claim that the
@@ -32,8 +34,20 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           key: core
-      - run: cargo fmt --all --check
-      - run: cargo test --locked -p nest-client -p desk-core -p mock-nest
+      - name: Cache yatr
+        id: cache-yatr
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/yatr
+          key: yatr-${{ runner.os }}-${{ env.YATR_VERSION }}
+      - name: Install yatr
+        if: steps.cache-yatr.outputs.cache-hit != 'true'
+        # RUSTFLAGS cleared so yatr does not inherit this project's flags.
+        run: cargo install yatr --version ${{ env.YATR_VERSION }} --locked
+        env:
+          RUSTFLAGS: ""
+      - run: yatr fmt-check
+      - run: yatr test-core
       - uses: EmbarkStudios/cargo-deny-action@v2
 
   linux:
@@ -59,10 +73,21 @@ jobs:
         with:
           components: clippy
       - uses: Swatinem/rust-cache@v2
-      - run: cargo build --locked
-      - run: cargo clippy --workspace --all-targets --locked -- -D warnings
-      - run: cargo test --workspace --locked
-      - run: tools/lint-qml.sh
+      - name: Cache yatr
+        id: cache-yatr
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/yatr
+          key: yatr-${{ runner.os }}-${{ env.YATR_VERSION }}
+      - name: Install yatr
+        if: steps.cache-yatr.outputs.cache-hit != 'true'
+        run: cargo install yatr --version ${{ env.YATR_VERSION }} --locked
+        env:
+          RUSTFLAGS: ""
+      - run: yatr build
+      - run: yatr lint
+      - run: yatr test
+      - run: yatr qmllint
 
   macos:
     name: macOS · build · clippy · test · qmllint
@@ -78,10 +103,21 @@ jobs:
         with:
           components: clippy
       - uses: Swatinem/rust-cache@v2
-      - run: cargo build --locked
-      - run: cargo clippy --workspace --all-targets --locked -- -D warnings
-      - run: cargo test --workspace --locked
-      - run: tools/lint-qml.sh
+      - name: Cache yatr
+        id: cache-yatr
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/yatr
+          key: yatr-${{ runner.os }}-${{ env.YATR_VERSION }}
+      - name: Install yatr
+        if: steps.cache-yatr.outputs.cache-hit != 'true'
+        run: cargo install yatr --version ${{ env.YATR_VERSION }} --locked
+        env:
+          RUSTFLAGS: ""
+      - run: yatr build
+      - run: yatr lint
+      - run: yatr test
+      - run: yatr qmllint
 
   windows:
     name: Windows · MSVC · build · test
@@ -97,5 +133,16 @@ jobs:
           cache: true
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - run: cargo build --locked
-      - run: cargo test --workspace --locked
+      - name: Cache yatr
+        id: cache-yatr
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/yatr.exe
+          key: yatr-${{ runner.os }}-${{ env.YATR_VERSION }}
+      - name: Install yatr
+        if: steps.cache-yatr.outputs.cache-hit != 'true'
+        run: cargo install yatr --version ${{ env.YATR_VERSION }} --locked
+        env:
+          RUSTFLAGS: ""
+      - run: yatr build
+      - run: yatr test
